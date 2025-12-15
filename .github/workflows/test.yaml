@@ -1,0 +1,130 @@
+name: Deploy Application (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - stg
+          - prod
+
+      cluster:
+        description: "Kubernetes cluster name"
+        required: true
+        type: string
+
+      namespace:
+        description: "Kubernetes namespace"
+        required: true
+        type: string
+
+      app_name:
+        description: "Application name"
+        required: true
+        type: string
+
+      image_tag:
+        description: "Docker image tag"
+        required: true
+        type: string
+
+      enable_mcp:
+        description: "Deploy MCP components"
+        required: false
+        type: boolean
+        default: false
+
+      enable_ingress:
+        description: "Enable ingress"
+        required: false
+        type: boolean
+        default: true
+
+      replicas:
+        description: "Number of replicas"
+        required: false
+        type: number
+        default: 2
+
+      cpu_request:
+        description: "CPU request"
+        required: false
+        type: string
+        default: "250m"
+
+      memory_request:
+        description: "Memory request"
+        required: false
+        type: string
+        default: "512Mi"
+
+      cpu_limit:
+        description: "CPU limit"
+        required: false
+        type: string
+        default: "500m"
+
+      memory_limit:
+        description: "Memory limit"
+        required: false
+        type: string
+        default: "1Gi"
+
+      rollout_strategy:
+        description: "Deployment strategy"
+        required: false
+        type: choice
+        default: rolling
+        options:
+          - rolling
+          - recreate
+
+      notify_slack:
+        description: "Send Slack notification"
+        required: false
+        type: boolean
+        default: true
+
+      dry_run:
+        description: "Dry run only (no apply)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Print inputs
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Cluster: ${{ inputs.cluster }}"
+          echo "Namespace: ${{ inputs.namespace }}"
+          echo "App: ${{ inputs.app_name }}"
+          echo "Image tag: ${{ inputs.image_tag }}"
+          echo "Enable MCP: ${{ inputs.enable_mcp }}"
+          echo "Ingress enabled: ${{ inputs.enable_ingress }}"
+          echo "Replicas: ${{ inputs.replicas }}"
+          echo "CPU request: ${{ inputs.cpu_request }}"
+          echo "Memory request: ${{ inputs.memory_request }}"
+          echo "CPU limit: ${{ inputs.cpu_limit }}"
+          echo "Memory limit: ${{ inputs.memory_limit }}"
+          echo "Rollout strategy: ${{ inputs.rollout_strategy }}"
+          echo "Notify Slack: ${{ inputs.notify_slack }}"
+          echo "Dry run: ${{ inputs.dry_run }}"
+
+      - name: Deploy (example)
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          echo "Deploying ${APP_NAME} to ${NAMESPACE}"
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          NAMESPACE: ${{ inputs.namespace }}
